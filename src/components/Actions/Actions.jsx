@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./Actions.module.scss";
 import { DatePicker, TimePicker } from "antd";
 import dayjs from "dayjs";
@@ -6,7 +6,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 
 dayjs.extend(customParseFormat);
 
-function Actions() {
+function Actions({ onChangeLed }) {
   const onChangeTimePicker = (time, timeString) => {
     console.log(time, timeString);
   };
@@ -15,6 +15,8 @@ function Actions() {
     console.log(date, dateString);
   };
 
+  const [isLed, setIsLed] = useState(false);
+
   return (
     <div>
       <div className="d-flex flex-row justify-content-between align-items-center">
@@ -22,8 +24,12 @@ function Actions() {
           <input
             className="form-check-input"
             type="checkbox"
-            role="switch"
             id="led"
+            value={isLed}
+            onChange={() => {
+              onChangeLed(!isLed)
+              setIsLed(!isLed)
+            }}
           />
           <label
             className={`${styles.label} form-check-label ms-2 user-select-none`}
@@ -85,7 +91,7 @@ function Actions() {
           <label className={`me-2 ${styles.label}`}>Start time: </label>
           <TimePicker
             onChange={onChangeTimePicker}
-            defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
+            defaultValue={dayjs("00:00:00", "HH:mm:ss")}
             className="ms-2"
           />
         </div>
@@ -93,7 +99,7 @@ function Actions() {
           <label className={`me-2 ${styles.label}`}>End time: </label>
           <TimePicker
             onChange={onChangeTimePicker}
-            defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
+            defaultValue={dayjs("00:00:00", "HH:mm:ss")}
             className="ms-2"
           />
         </div>
