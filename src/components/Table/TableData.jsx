@@ -1,63 +1,38 @@
 import React from "react";
-import { Space, Table, Tag } from 'antd';
+import { Table } from "antd";
 
-function TableData() {
+function TableData({ keyData, data, time }) {
   const columns = [
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => <a>{text}</a>,
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
+      title: "Time",
+      dataIndex: "time",
+      key: "time",
     },
     {
-      title: "Tags",
-      key: "tags",
-      dataIndex: "tags",
-      render: (_, { tags }) => (
-        <>
-          {tags.map((tag) => {
-            let color = tag.length > 5 ? "geekblue" : "green";
-            if (tag === "loser") {
-              color = "volcano";
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </>
-      ),
+      title: "Data",
+      key: keyData,
+      dataIndex: keyData,
     },
   ];
-  const data = [
-    {
-      key: "1",
-      name: "John Brown",
-      age: 32,
-      tags: ["nice", "developer"],
-    },
-    {
-      key: "2",
-      name: "Jim Green",
-      age: 42,
-      tags: ["loser"],
-    },
-    {
-      key: "3",
-      name: "Joe Black",
-      age: 32,
-      tags: ["cool", "teacher"],
-    },
-  ];
+  const dataTable = [];
+
+  data.forEach((item, index) => {
+    dataTable.push({
+      key: index,
+      stt: index,
+      time: time[index],
+      [keyData]: item,
+    })
+  })
+  
   return (
     <div>
-      <Table columns={columns} dataSource={data} />
+      <Table columns={columns} dataSource={dataTable} />
     </div>
   );
 }
