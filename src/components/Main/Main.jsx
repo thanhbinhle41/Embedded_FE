@@ -22,6 +22,12 @@ const Main = () => {
   const [isLed, setIsLed] = useState(true);
   const [isPumb, setIsPumb] = useState(true);
 
+  const [auto, setAuto] = useState({
+    isAuto: false,
+    light: false,
+    pump: false,
+  });
+
   useEffect(() => {
     const host = "broker.emqx.io";
     const port = 8084;
@@ -57,11 +63,50 @@ const Main = () => {
         setListLabelsChart((oldvalue) => [...oldvalue, getTimeNow()]);
         setListMeasureData((oldvalue) => [...oldvalue, payload]);
         setMeasureData(payload);
+
         break;
       default:
         break;
     }
   };
+
+  useEffect(() => {
+    if (auto.isAuto) {
+      const context = {
+        topic: "web_arduino_client_topic",
+        qos: 0,
+        payload: {
+          type: "turn_on",
+          device: "Light",
+        },
+      };
+      if (auto.light) {
+        context.payload.device = "Light";
+        if (measureData.light >= 2700 && !isLed) {
+          setIsLed(true);
+          context.payload.type = "turn_on";
+          console.log(context);
+          mqttPublish(clientMqtt, context);
+        } else if (measureData.light < 2700 && isLed) {
+          setIsLed(false);
+          context.payload.type = "turn_off";
+          mqttPublish(clientMqtt, context);
+        }
+      } else if (auto.pump) {
+        context.payload.device = "Pump";
+        if (measureData.soil > 800 && !isPumb) {
+          setIsPumb(true);
+          context.payload.type = "turn_on";
+          console.log(context);
+          mqttPublish(clientMqtt, context);
+        } else if (measureData.soil <= 800 && isPumb) {
+          setIsPumb(false);
+          context.payload.type = "turn_off";
+          mqttPublish(clientMqtt, context);
+        }
+      }
+    }
+  }, [auto, clientMqtt, isLed, isPumb, measureData]);
 
   useEffect(() => {
     if (clientMqtt) {
@@ -97,7 +142,7 @@ const Main = () => {
         context["payload"]["type"] = "measure_continuous";
         mqttPublish(clientMqtt, context);
       }
-    }, 10000);
+    }, 5000);
 
     return () => clearInterval(intervalId);
   }, [clientMqtt]);
@@ -116,35 +161,21 @@ const Main = () => {
   };
 
   const onAutoDevice = (device, value) => {
-    const context = {
-      topic: "web_arduino_client_topic",
-      qos: 0,
-      payload: {
-        type: "turn_on",
-        device: device,
-      },
-    };
+    const tmpAuto = structuredClone(auto);
+    tmpAuto.isAuto = value;
     if (device === "Light" && value) {
-      if (measureData.light < 2500 && !isLed) {
-        setIsLed(true);
-        context.payload.type = "turn_on";
-        mqttPublish(clientMqtt, context);
-      } else if (measureData.light >= 2500 && isLed) {
-        setIsLed(false);
-        context.payload.type = "turn_off";
-        mqttPublish(clientMqtt, context);
-      }
-    } else if (device === "Pumb" && value) {
-      if (measureData.soil > 800 && !isPumb) {
-        setIsPumb(true);
-        context.payload.type = "turn_on";
-        mqttPublish(clientMqtt, context);
-      } else if (measureData.soil <= 800 && isPumb) {
-        setIsPumb(false);
-        context.payload.type = "turn_off";
-        mqttPublish(clientMqtt, context);
-      }
+      tmpAuto.light = true;
+    } else if (device === "Light" && !value) {
+      tmpAuto.light = false;
     }
+
+    if (device === "Pump" && value) {
+      tmpAuto.pump = true;
+    } else if (device === "Light" && !value) {
+      tmpAuto.pump = false;
+    }
+    console.log(tmpAuto);
+    setAuto(tmpAuto);
   };
 
   const onSetTimeToSend = (device, status) => {
