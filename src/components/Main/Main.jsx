@@ -6,6 +6,7 @@ import Weather from "../Weather/Weather";
 import Actions from "../Actions/Actions";
 import Information from "../Infomation/Information";
 import ChartContainer from "../Chart/ChartContainer";
+import Dictaphone from "../SpeechRecognition/Dictaphone";
 
 const Main = () => {
   const [clientMqtt, setClientMqtt] = useState(null);
@@ -207,6 +208,9 @@ const Main = () => {
       <div className="d-flex justify-content-between">
         <Clock></Clock>
         <Weather></Weather>
+      </div>
+      <div className="mt-4">
+        <Dictaphone/>
       </div>
       {/* ACTIONS */}
       <div className="border w-100 mt-4 p-4">
