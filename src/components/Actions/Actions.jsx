@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import styles from "./Actions.module.scss";
 import { Timer } from "./Timer";
 
-function Actions({ onToggleDevice, onAutoDevice, setIsLed, isLed, isPumb, setIsPumb, onSetTimeToSend }) {
-  const [isDoor, setIsDoor] = useState(true);
+function Actions({ onToggleDevice, onAutoDevice, setIsLed, isLed, isPumb, setIsPumb,isDoor, setIsDoor, onSetTimeToSend }) {
 
   const [auto, setAuto] = useState({
     led: false,

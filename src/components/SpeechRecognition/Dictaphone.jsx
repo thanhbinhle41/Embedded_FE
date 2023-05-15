@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import styles from "./Dictaphone.module.scss"
+import styles from "./Dictaphone.module.scss";
 
-const Dictaphone = () => {
+const Dictaphone = ({ callbackSpeechCommand }) => {
   const {
     transcript,
     listening,
@@ -12,13 +12,25 @@ const Dictaphone = () => {
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
 
+  const [preTranscript, setPreTranscript] = useState("");
+
+  useEffect(() => {
+    if (!listening && transcript !== "" && transcript !== preTranscript) {
+      setPreTranscript(transcript)
+      callbackSpeechCommand(transcript)
+    }
+  }, [listening, transcript, callbackSpeechCommand, preTranscript])
+
+
   if (!browserSupportsSpeechRecognition) {
     return <span>Browser doesn't support speech recognition.</span>;
   }
 
   return (
     <div className="d-flex justify-content-center flex-column align-items-center border p-3">
-      <span className={styles.label}>Microphone: {listening ? "On" : "Off"}</span>
+      <span className={styles.label}>
+        Microphone: {listening ? "On" : "Off"}
+      </span>
       <div className="my-3">
         <button
           className="btn btn-secondary"

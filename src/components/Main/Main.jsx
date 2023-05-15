@@ -22,6 +22,7 @@ const Main = () => {
 
   const [isLed, setIsLed] = useState(true);
   const [isPumb, setIsPumb] = useState(true);
+  const [isDoor, setIsDoor] = useState(true);
 
   const [auto, setAuto] = useState({
     isAuto: false,
@@ -202,6 +203,52 @@ const Main = () => {
     mqttPublish(clientMqtt, context);
   };
 
+  const callbackSpeechCommand = (transcript) => {
+    if (transcript.trim() === "") return;
+    const value = transcript.trim().toLowerCase();
+    let device = "";
+    if (value.includes("light")) {
+      device = "Light";
+    }
+    if (value.includes("pump")) {
+      device = "Pump"
+    }
+    if (value.includes("door")) {
+      device = "Servo";
+    }
+    const context = {
+      topic: "web_arduino_client_topic",
+      qos: 0,
+      payload: {
+        type: "",
+        device: device,
+      },
+    };
+    if (value.includes("open") || value.includes("turn on")) {
+      context["payload"]["type"] = "turn_on";
+      mqttPublish(clientMqtt, context);
+      setStateDevice(device, context["payload"]["type"]);
+    }
+    else if (value.includes("close") || value.includes("turn off")) {
+      context["payload"]["type"] = "turn_off";
+      mqttPublish(clientMqtt, context);
+      setStateDevice(device, context["payload"]["type"]);
+    }
+  }
+
+  const setStateDevice = (device, status) => {
+    const newStatus = status === "turn_on" ? true : false;
+    if (device === "Light") {
+      setIsLed(newStatus);
+    }
+    else if (device === "Pump") {
+      setIsPumb(newStatus)
+    }
+    else if (device === "Servo") {
+      setIsDoor(newStatus);
+    } 
+  }
+
   return (
     <div className="container my-4">
       {/* HEADER */}
@@ -210,7 +257,9 @@ const Main = () => {
         <Weather></Weather>
       </div>
       <div className="mt-4">
-        <Dictaphone/>
+        <Dictaphone
+          callbackSpeechCommand={callbackSpeechCommand}
+        />
       </div>
       {/* ACTIONS */}
       <div className="border w-100 mt-4 p-4">
@@ -221,6 +270,8 @@ const Main = () => {
           setIsPumb={setIsPumb}
           setIsLed={setIsLed}
           isLed={isLed}
+          isDoor={isDoor}
+          setIsDoor={setIsDoor}
           onSetTimeToSend={onSetTimeToSend}
         />
       </div>
